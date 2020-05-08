@@ -1,0 +1,39 @@
+version: 2.1
+
+orbs:
+  node: circleci/node@1.1.6
+
+workflows:
+  circleci_tests:
+    # The following jobs run in the following stages:
+    # - Setup runs first.
+    # - After setup passes, frontend tests run.
+    jobs:
+      - setup
+      - frontend_tests:
+          requires:
+            - setup
+
+anchor_for_job_defaults: &job_defaults
+  working_directory: /home/circleci/oppiabot
+
+jobs:
+  setup:
+    <<: *job_defaults
+    executor:
+      name: node/default
+    steps:
+      - checkout
+      - node/with-cache:
+          steps:
+            - run: npm install
+
+  frontend_tests:
+    <<: *job_defaults
+    executor:
+      name: node/default
+    steps:
+      - checkout
+      - node/with-cache:
+          steps:
+            - run: npm run test
