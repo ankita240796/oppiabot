@@ -1,8 +1,5 @@
 version: 2.1
 
-orbs:
-  node: circleci/node@1.1.6
-
 workflows:
   circleci_tests:
     # The following jobs run in the following stages:
@@ -14,26 +11,30 @@ workflows:
           requires:
             - setup
 
+var_for_docker_image: &docker_image circleci/node:7
+
 anchor_for_job_defaults: &job_defaults
   working_directory: /home/circleci/oppiabot
+  docker:
+    - image: *docker_image
 
 jobs:
   setup:
     <<: *job_defaults
-    executor:
-      name: node/default
     steps:
       - checkout
-      - node/with-cache:
-          steps:
-            - run: npm install
+      - run:
+          name: Install dependencies
+          command: npm install
+      - persist_to_workspace:
+          root: /home/circleci/
+          paths:
+            - oppiabot/node_modules/
 
   frontend_tests:
     <<: *job_defaults
-    executor:
-      name: node/default
     steps:
       - checkout
-      - node/with-cache:
-          steps:
-            - run: npm run test
+      - run:
+          name: Run frontend tests
+          command: npm run test
